@@ -1,17 +1,18 @@
 package com.appsdeveloper.estore.productservice.services;
 
-import com.appsdeveloper.estore.productservice.dto.ProductRequest;
-import com.appsdeveloper.estore.productservice.dto.ProductResponse;
-import com.appsdeveloper.estore.productservice.entity.ProductEntity;
+import com.appsdeveloper.estore.productservice.model.dto.ProductRequest;
+import com.appsdeveloper.estore.productservice.model.dto.ProductResponse;
+import com.appsdeveloper.estore.productservice.model.entity.ProductEntity;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
 public interface ProductService {
-    public List<ProductResponse> getAllProducts();
+    public ResponseEntity<List<ProductResponse>> getAllProducts();
 
     public ProductEntity findById(int theId);
 
-    public void save(ProductEntity theEmployee);
+    public ProductEntity saveProduct(ProductRequest productRequest);
 
-    void insert(ProductRequest productRequest);
+    ResponseEntity<ProductEntity> insert(ProductRequest productRequest);
 }

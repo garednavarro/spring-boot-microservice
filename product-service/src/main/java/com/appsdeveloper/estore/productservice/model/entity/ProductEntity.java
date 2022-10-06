@@ -1,4 +1,4 @@
-package com.appsdeveloper.estore.productservice.entity;
+package com.appsdeveloper.estore.productservice.model.entity;
 
 import lombok.*;
 import org.hibernate.Hibernate;

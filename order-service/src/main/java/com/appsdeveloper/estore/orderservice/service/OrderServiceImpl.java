@@ -5,9 +5,12 @@ import com.appsdeveloper.estore.orderservice.dto.OrderLineItemsDto;
 import com.appsdeveloper.estore.orderservice.dto.OrderRequestDto;
 import com.appsdeveloper.estore.orderservice.entity.OrderEntity;
 import com.appsdeveloper.estore.orderservice.entity.OrderLineItemsEntity;
+import com.appsdeveloper.estore.orderservice.event.OrderPlacedEvent;
 import com.appsdeveloper.estore.orderservice.repository.OrderRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -19,16 +22,12 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@AllArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
     private OrderRepository orderRepository;
     private final WebClient.Builder webClientBuilder;
-
-    @Autowired
-    public OrderServiceImpl(OrderRepository orderRepository, WebClient.Builder webClientBuilder) {
-        this.orderRepository = orderRepository;
-        this.webClientBuilder = webClientBuilder;
-    }
+    private final KafkaTemplate<String, OrderPlacedEvent> kafkaTemplate;
 
     @Override
     public String placeOrder(OrderRequestDto orderRequestDto) {
@@ -58,6 +57,7 @@ public class OrderServiceImpl implements OrderService {
 
         if (allProductsInStock) {
             orderRepository.save(order);
+            kafkaTemplate.send("notificationTopic", new OrderPlacedEvent(order.getOrderNumber()));
             return "Order Placed Successfully";
         } else {
             throw new IllegalArgumentException("Product is not in stock, please try again later");

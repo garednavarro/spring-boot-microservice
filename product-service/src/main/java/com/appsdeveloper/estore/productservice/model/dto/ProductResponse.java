@@ -1,4 +1,4 @@
-package com.appsdeveloper.estore.productservice.dto;
+package com.appsdeveloper.estore.productservice.model.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

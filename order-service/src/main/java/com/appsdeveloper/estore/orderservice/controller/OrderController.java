@@ -23,11 +23,13 @@ public class OrderController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @CircuitBreaker(name = "inventory", fallbackMethod = "fallbackMethod")
+    //@CircuitBreaker(name = "inventory", fallbackMethod = "fallbackMethod")
     //@TimeLimiter(name = "inventory")
     //@Retry(name = "inventory")
-    public CompletableFuture<String> placeOrder(@RequestBody OrderRequestDto orderRequest){
-        return CompletableFuture.supplyAsync(() -> orderService.placeOrder(orderRequest));
+    //CompletableFuture<String>
+    public String placeOrder(@RequestBody OrderRequestDto orderRequest){
+        return orderService.placeOrder(orderRequest);
+        //return CompletableFuture.supplyAsync(() -> orderService.placeOrder(orderRequest));
         //orderService.placeOrder(orderRequest);
         //return "Order Placed Succesfully";
     }
