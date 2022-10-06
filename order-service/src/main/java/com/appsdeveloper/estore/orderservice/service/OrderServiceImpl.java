@@ -7,6 +7,7 @@ import com.appsdeveloper.estore.orderservice.entity.OrderEntity;
 import com.appsdeveloper.estore.orderservice.entity.OrderLineItemsEntity;
 import com.appsdeveloper.estore.orderservice.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -30,7 +31,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void placeOrder(OrderRequestDto orderRequestDto) {
+    public String placeOrder(OrderRequestDto orderRequestDto) {
         OrderEntity order = new OrderEntity();
         order.setOrderNumber(UUID.randomUUID().toString());
         List<OrderLineItemsEntity> orderLineItemsEntities = orderRequestDto.getOrderLineItemsDtos()
@@ -43,6 +44,7 @@ public class OrderServiceImpl implements OrderService {
                 .stream()
                 .map(OrderLineItemsEntity::getSkuCode)
                 .collect(Collectors.toList());
+
         // call inventory service, and place order if product is in stock
         InventoryResponse[] inventoryResponses = webClientBuilder.build().get()
                 .uri("http://inventory-service/api/inventory", uriBuilder -> uriBuilder.queryParam("skuCode", skuCodes).build())
@@ -54,11 +56,12 @@ public class OrderServiceImpl implements OrderService {
 
         boolean allProductsInStock = Arrays.stream(inventoryResponses).allMatch(InventoryResponse::isInStock);
 
-        if (allProductsInStock)
+        if (allProductsInStock) {
             orderRepository.save(order);
-        else
+            return "Order Placed Successfully";
+        } else {
             throw new IllegalArgumentException("Product is not in stock, please try again later");
-
+        }
     }
 
     @Override

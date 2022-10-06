@@ -5,7 +5,7 @@ import com.appsdeveloper.estore.orderservice.dto.OrderRequestDto;
 import com.appsdeveloper.estore.orderservice.entity.OrderLineItemsEntity;
 
 public interface OrderService {
-    public void placeOrder(OrderRequestDto orderRequestDto);
+    public String placeOrder(OrderRequestDto orderRequestDto);
 
     public OrderLineItemsEntity mapToDto(OrderLineItemsDto orderLineItemsDto);
 
