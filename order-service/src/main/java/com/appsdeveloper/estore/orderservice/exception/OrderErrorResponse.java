@@ -1,2 +1,4 @@
-package com.appsdeveloper.estore.orderservice.exception;public class OrderErrorResponse {
+package com.appsdeveloper.estore.orderservice.exception;
+
+public class OrderErrorResponse {
 }

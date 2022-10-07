@@ -1,4 +1,4 @@
-package com.appsdeveloper.estore.orderservice.entity;
+package com.appsdeveloper.estore.orderservice.model.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

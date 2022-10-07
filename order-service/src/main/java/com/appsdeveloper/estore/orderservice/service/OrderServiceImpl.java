@@ -1,15 +1,13 @@
 package com.appsdeveloper.estore.orderservice.service;
 
-import com.appsdeveloper.estore.orderservice.dto.InventoryResponse;
-import com.appsdeveloper.estore.orderservice.dto.OrderLineItemsDto;
-import com.appsdeveloper.estore.orderservice.dto.OrderRequestDto;
-import com.appsdeveloper.estore.orderservice.entity.OrderEntity;
-import com.appsdeveloper.estore.orderservice.entity.OrderLineItemsEntity;
+import com.appsdeveloper.estore.orderservice.model.dto.InventoryResponse;
+import com.appsdeveloper.estore.orderservice.model.dto.OrderLineItemsDto;
+import com.appsdeveloper.estore.orderservice.model.dto.OrderRequestDto;
+import com.appsdeveloper.estore.orderservice.model.entity.OrderEntity;
+import com.appsdeveloper.estore.orderservice.model.entity.OrderLineItemsEntity;
 import com.appsdeveloper.estore.orderservice.event.OrderPlacedEvent;
 import com.appsdeveloper.estore.orderservice.repository.OrderRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

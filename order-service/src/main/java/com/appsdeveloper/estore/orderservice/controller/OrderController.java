@@ -1,10 +1,7 @@
 package com.appsdeveloper.estore.orderservice.controller;
 
-import com.appsdeveloper.estore.orderservice.dto.OrderRequestDto;
+import com.appsdeveloper.estore.orderservice.model.dto.OrderRequestDto;
 import com.appsdeveloper.estore.orderservice.service.OrderServiceImpl;
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.retry.annotation.Retry;
-import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;

@@ -25,26 +25,11 @@ public class ProductServiceImpl implements ProductService {
     public ResponseEntity<List<ProductResponse>> getAllProducts() {
         List<ProductEntity> products = productRepository.findAll();
         return ResponseEntity.ok(productRepository.findAll().stream().map(ProductMapper::convertToDto).collect(Collectors.toList()));
-        //return products.stream().map(this::mapToProductResponse).collect(Collectors.toList());
-    }
-
-    private ProductResponse mapToProductResponse(ProductEntity product) {
-        return ProductResponse.builder()
-                .id(product.getId())
-                .name(product.getName())
-                .description(product.getDescription())
-                .price(product.getPrice())
-                .build();
     }
 
     @Override
     public ProductEntity findById(int theId) {
         return productRepository.findById(theId).orElseThrow(ProductNotFoundException::new);
-        //ProductEntity product = productRepository.findById(theId).orElseThrow(ProductNotFoundException::new);
-        /*if (product.isEmpty())
-            //throw new RuntimeException(String.format("Product with id %s not found", theId));
-            throw new ProductNotFoundException();*/
-        //return product.get();
     }
 
     @Override
