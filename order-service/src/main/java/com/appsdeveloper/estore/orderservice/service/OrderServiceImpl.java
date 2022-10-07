@@ -1,13 +1,16 @@
 package com.appsdeveloper.estore.orderservice.service;
 
+import com.appsdeveloper.estore.orderservice.exception.OrderNotPlacedException;
 import com.appsdeveloper.estore.orderservice.model.dto.InventoryResponse;
 import com.appsdeveloper.estore.orderservice.model.dto.OrderLineItemsDto;
 import com.appsdeveloper.estore.orderservice.model.dto.OrderRequestDto;
 import com.appsdeveloper.estore.orderservice.model.entity.OrderEntity;
 import com.appsdeveloper.estore.orderservice.model.entity.OrderLineItemsEntity;
 import com.appsdeveloper.estore.orderservice.event.OrderPlacedEvent;
+import com.appsdeveloper.estore.orderservice.model.mapper.OrderMapper;
 import com.appsdeveloper.estore.orderservice.repository.OrderRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,44 +33,54 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public String placeOrder(OrderRequestDto orderRequestDto) {
         OrderEntity order = new OrderEntity();
-        order.setOrderNumber(UUID.randomUUID().toString());
-        List<OrderLineItemsEntity> orderLineItemsEntities = orderRequestDto.getOrderLineItemsDtos()
-                .stream()
-                .map(this::mapToDto).collect(Collectors.toList());
-        order.setOrderLineItemsEntities(orderLineItemsEntities);
 
-        List<String> skuCodes = order
+        setUpOrder(orderRequestDto, order);
+
+        if (allProductsAreInStock(order)) {
+            return placeOrderSuccessfully(order);
+        } else {
+            throw new OrderNotPlacedException("Product is not in stock, please try again later");
+        }
+    }
+
+    private void setUpOrder(OrderRequestDto orderRequestDto, OrderEntity order) {
+        order.setOrderNumber(UUID.randomUUID().toString());
+
+        List<OrderLineItemsEntity> orderLineItemsEntities = collectMappedEntities(orderRequestDto);
+
+        order.setOrderLineItemsEntities(orderLineItemsEntities);
+    }
+
+    private List<OrderLineItemsEntity> collectMappedEntities(OrderRequestDto orderRequestDto) {
+        return orderRequestDto.getOrderLineItemsDtos()
+                .stream()
+                .map(OrderMapper::mapToDto).collect(Collectors.toList());
+    }
+
+    public List<String> getSkuCodesFromOrder(OrderEntity order) {
+        return order
                 .getOrderLineItemsEntities()
                 .stream()
                 .map(OrderLineItemsEntity::getSkuCode)
                 .collect(Collectors.toList());
+    }
 
-        // call inventory service, and place order if product is in stock
-        InventoryResponse[] inventoryResponses = webClientBuilder.build().get()
+    private InventoryResponse[] makeSynchronousComunicationWithInventoryService(List<String> skuCodes) {
+        return webClientBuilder.build().get()
                 .uri("http://inventory-service/api/inventory", uriBuilder -> uriBuilder.queryParam("skuCode", skuCodes).build())
                 .retrieve()
                 .bodyToMono(InventoryResponse[].class)
                 .block();
-
-        assert inventoryResponses != null;
-
-        boolean allProductsInStock = Arrays.stream(inventoryResponses).allMatch(InventoryResponse::isInStock);
-
-        if (allProductsInStock) {
-            orderRepository.save(order);
-            kafkaTemplate.send("notificationTopic", new OrderPlacedEvent(order.getOrderNumber()));
-            return "Order Placed Successfully";
-        } else {
-            throw new IllegalArgumentException("Product is not in stock, please try again later");
-        }
     }
 
-    @Override
-    public OrderLineItemsEntity mapToDto(OrderLineItemsDto orderLineItemsDto) {
-        OrderLineItemsEntity orderLineItems = new OrderLineItemsEntity();
-        orderLineItems.setPrice(orderLineItemsDto.getPrice());
-        orderLineItems.setQuantity(orderLineItemsDto.getQuantity());
-        orderLineItems.setSkuCode(orderLineItemsDto.getSkuCode());
-        return orderLineItems;
+    private boolean allProductsAreInStock(OrderEntity order) {
+        List<String> skuCodes = getSkuCodesFromOrder(order);
+        return Arrays.stream(makeSynchronousComunicationWithInventoryService(skuCodes)).allMatch(InventoryResponse::isInStock);
+    }
+
+    private String placeOrderSuccessfully(OrderEntity order){
+        orderRepository.save(order);
+        kafkaTemplate.send("notificationTopic", new OrderPlacedEvent(order.getOrderNumber()));
+        return "Order Placed Successfully";
     }
 }

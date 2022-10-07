@@ -7,6 +7,6 @@ import com.appsdeveloper.estore.orderservice.model.entity.OrderLineItemsEntity;
 public interface OrderService {
     public String placeOrder(OrderRequestDto orderRequestDto);
 
-    public OrderLineItemsEntity mapToDto(OrderLineItemsDto orderLineItemsDto);
+    //public OrderLineItemsEntity mapToDto(OrderLineItemsDto orderLineItemsDto);
 
 }
