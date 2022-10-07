@@ -5,8 +5,6 @@ import lombok.NoArgsConstructor;
 
 public class ProductNotFoundException extends RuntimeException {
 
-    //private String message;
-
     public ProductNotFoundException(String message, Throwable cause){
         super(message, cause);
     }
